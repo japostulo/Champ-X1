@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champs X1</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+    <script src="./champs.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+<body>
+    <div id="app">
+        
+        <div class="container" v-show="champContainer">
+            <div class="row">
+                <div class="col d-flex justify-content-center">
+                    <h3>{{titleChampSelect}}</h3>
+                </div>
+            </div>
+            <div class="row mt-4" @onload="setChamps" style="height:35rem;overflow-y:scroll">
+                <div class="col text-center" v-for="champ in champs" @click='loadPlayersData(champ.id)'>
+                     <img :src="'http://ddragon.leagueoflegends.com/cdn/10.13.1/img/champion/'+[champ.id]+'.png'" class="champ-icon" :class="{'champ-select':champ.id==champSelect}" style="width:5rem;"> 
+                     <p class="d-flex justify-content-center">{{champ.name}}</p>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col d-flex justify-content-center">
+                    <div class="rounded-circle" style="overflow: hidden;">
+                        <button type="button" class="btn btn-primary mt-4" @click="cronometroChamp()" :class="{disabled:buttonDisable}" style="width:14rem;height:5rem;overflow:hidden;border-radius:15px 15px 200px 200px" data-toggle="modal" data-target="#modalChampSelect">
+                            <h3>Confirmar</h3>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+            
+        <!-- Modal -->
+        <div class="modal fade" id="modalChampSelect" tabindex="-1" role="dialog" @click="resetarCronometro()" aria-labelledby="modelTitleId" aria-hidden="true">
+            <div class="modal-dialog" style="max-width:60rem" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="margin:auto">
+                        <h5 class="modal-title">Confronto entre</h5>
+                    </div>
+                    <div class="modal-body d-flex align-items-center justify-content-center">
+                        <div>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="max-width:25rem;height:25rem;overflow:hidden">
+                                <img class="img-fluid" style="":src="'http://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + [player1Obj.id] + '_0.jpg'" alt="Imagem de capa do card">
+                            </div>
+                            <div >
+                            <h5 class="d-flex justify-content-center" >{{player1Obj.name}} - {{player1Obj.title}} </h5>
+                            </div>
+                        </div>
+                        
+                        <div style="height:25rem">
+                            <span class="d-flex align-items-start">
+                                <h1 class=''>{{timer}}</h1>
+                            </span>
+
+                            <span class="d-flex align-items-end h-50">
+                                <h1 class=''>VS</h1>
+                            </span>
+                            
+
+                        </div>
+
+                        <div>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="max-width:25rem;height:25rem;overflow:hidden">
+                                <img class="img-fluid" :src="'http://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + [player2Obj.id] + '_0.jpg'" alt="Imagem de capa do card">
+                            </div>
+                            <div>
+                            <h5 class="d-flex justify-content-center" >{{player2Obj.name}} - {{player2Obj.title}} </h5>
+                            </div>
+                        </div>                    
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" @click="resetarCronometro()">Selecionar outro campeão</button>
+                        <button type="button" class="btn btn-success" data-dismiss="modal" @click="resetarCronometro(),champContainer=false">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-show="!champContainer">
+            <div class="panel scores">
+                <div class="score">
+                    <h1>{{player1Obj.name}}</h1>
+                    <div class="life-bar">
+                        <div class="life"
+                        :class="{danger: ((p1Hp*100)/p1Hp) < 20}"
+                        :style="{width:  ((p1Hp*100)/p1Hp) + '%'}">
+                        {{(p1Hp*100)/p1Hp}}
+                        </div>
+                    </div>
+                    <div>{{p1Hp}} HP</div>
+                </div>
+    
+                <div class="score">
+                    <h1>{{player2Obj.name}}</h1>
+                    <div class="life-bar">
+                        <div class="life"
+                        :class="{danger: ((p2Hp*100)/p2Hp) < 20}"
+                        :style="{width: ((p2Hp*100)/p2Hp) + '%'}">
+                        {{(p2Hp*100)/p2Hp}}
+                        </div>
+                    </div>
+                    <div>{{p2Hp}} HP</div>
+                </div>
+    
+            </div>
+            <div class="panel result"></div>
+            <div class="panel buttons"></div>
+            <div class="panel logs"></div>
+        </div>
+ 
+    </div>
+    <script src="app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+ 
+</body>
+</html>
